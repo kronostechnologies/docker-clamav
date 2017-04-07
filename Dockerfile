@@ -1,18 +1,26 @@
-FROM alpine:edge
+FROM debian:stretch-slim
 LABEL maintainer "sysadmin@kronostechnologies.com"
 
-RUN apk add --update \
-        bash \
-        clamav \
-        clamav-libunrar && \
-    rm -fr /var/cache/apk/*
+ADD http://database.clamav.net/main.cvd /var/lib/clamav/main.cvd 
+ADD http://database.clamav.net/daily.cvd /var/lib/clamav/daily.cvd
+ADD http://database.clamav.net/bytecode.cvd /var/lib/clamav/bytecode.cvd 
 
-RUN mkdir /run/clamav && chown clamav:clamav /run/clamav && freshclam
-COPY ./configuration/conf.d/clamd.conf /etc/clamd.conf
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        clamav-daemon \
+        clamav-freshclam && \
+        apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
+# Permission & clamd.conf setup
+RUN mkdir /run/clamav && chown clamav:clamav /run/clamav && chown -R clamav:clamav /var/lib/clamav/
+COPY ./confd/conf.d/clamd.conf /etc/clamav/clamd.conf
 
-COPY docker-entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+# Install start/stop scripts
+COPY ./configuration /k
+
+# Install entrypoint
+ADD https://github.com/kronostechnologies/docker-init-entrypoint/releases/download/1.2.0/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 EXPOSE 3310
-CMD ["/entrypoint.sh"]
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
