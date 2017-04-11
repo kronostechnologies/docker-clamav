@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Permission & clamd.conf setup
 RUN mkdir /run/clamav && chown clamav:clamav /run/clamav && chown -R clamav:clamav /var/lib/clamav/
 COPY ./confd/conf.d/clamd.conf /etc/clamav/clamd.conf
+COPY ./confd/conf.d/freshclam.conf /etc/clamav/freshclam.conf
 
 # Install start/stop scripts
 COPY ./configuration /k
