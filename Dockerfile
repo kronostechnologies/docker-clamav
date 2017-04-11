@@ -12,11 +12,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Permission & clamd.conf setup
 RUN mkdir /run/clamav && chown clamav:clamav /run/clamav && chown -R clamav:clamav /var/lib/clamav/
-COPY ./confd/conf.d/clamd.conf /etc/clamav/clamd.conf
-COPY ./confd/conf.d/freshclam.conf /etc/clamav/freshclam.conf
+COPY ./conf.d/clamd.conf /etc/clamav/clamd.conf
+COPY ./conf.d/freshclam.conf /etc/clamav/freshclam.conf
 
 # Install start/stop scripts
-COPY ./configuration /k
+COPY ./entrypoint /k
 
 # Install entrypoint
 ADD https://github.com/kronostechnologies/docker-init-entrypoint/releases/download/1.2.0/entrypoint.sh /usr/local/bin/entrypoint.sh
