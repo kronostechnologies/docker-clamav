@@ -1,4 +1,4 @@
-FROM debian:jessie-slim
+FROM debian:stretch-slim
 LABEL maintainer "sysadmin@kronostechnologies.com"
 
 ADD http://database.clamav.net/main.cvd /var/lib/clamav/main.cvd 
