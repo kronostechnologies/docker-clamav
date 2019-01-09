@@ -1,6 +1,9 @@
 FROM debian:stretch-slim
 LABEL maintainer "sysadmin@kronostechnologies.com"
 
+ENV CLAMD_CONF="" \
+    FRESHCLAM_CONF=""
+
 ADD http://database.clamav.net/main.cvd /var/lib/clamav/main.cvd 
 ADD http://database.clamav.net/daily.cvd /var/lib/clamav/daily.cvd
 ADD http://database.clamav.net/bytecode.cvd /var/lib/clamav/bytecode.cvd 
