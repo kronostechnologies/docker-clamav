@@ -1,12 +1,8 @@
-FROM debian:stretch-slim
+FROM debian:buster-slim
 LABEL maintainer "sysadmin@kronostechnologies.com"
 
 ENV CLAMD_CONF="" \
     FRESHCLAM_CONF=""
-
-ADD http://database.clamav.net/main.cvd /var/lib/clamav/main.cvd 
-ADD http://database.clamav.net/daily.cvd /var/lib/clamav/daily.cvd
-ADD http://database.clamav.net/bytecode.cvd /var/lib/clamav/bytecode.cvd 
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         clamav-daemon \
@@ -24,6 +20,11 @@ COPY ./entrypoint /k
 # Install entrypoint
 ADD https://github.com/kronostechnologies/docker-init-entrypoint/releases/download/1.2.0/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Update definitions
+RUN freshclam
+
+VOLUME /var/lib/clamav
 
 EXPOSE 3310
 
