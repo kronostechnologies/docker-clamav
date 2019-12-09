@@ -1,4 +1,4 @@
 #!/bin/bash
 
-ionice -c 3 nice -n 19 freshclam -d &&
-ionice -c 3 nice -n 19 clamd &
+ionice -c3 nice -n19 freshclam -d &&
+ionice -c3 nice -n19 clamd &
