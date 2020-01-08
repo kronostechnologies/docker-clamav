@@ -1,12 +1,8 @@
-FROM debian:buster-slim
-LABEL maintainer "sysadmin@kronostechnologies.com"
+FROM debian:bullseye-slim
+LABEL maintainer "na-qc@equisoft.com"
 
 ENV CLAMD_CONF="" \
     FRESHCLAM_CONF=""
-
-RUN echo 'Package: *\nPin: release a=unstable\nPin-Priority: 100' > /etc/apt/preferences.d/sid ; \
-    echo 'Package: clamav* libclam* libc6 libc-bin libpcre2-8-0\nPin: release a=unstable\nPin-Priority: 800' > /etc/apt/preferences.d/clamav ; \
-    echo "deb http://deb.debian.org/debian/ sid main" > /etc/apt/sources.list.d/sid.list
 
 RUN apt-get update && \
      apt-get install -y --no-install-recommends ca-certificates libclamav9 clamav-daemon clamav-freshclam && \
