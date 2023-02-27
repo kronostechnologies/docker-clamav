@@ -1,0 +1,89 @@
+name: Docker
+
+on:
+  pull_request: {}
+  push:
+    branches:
+      - master
+    tags:
+      - v*.*.*
+
+jobs:
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    outputs:
+      is-release: ${{ steps.metadata.outputs.is-release }}
+      publishable: ${{ steps.metadata.outputs.publishable }}
+      version: ${{ steps.metadata.outputs.version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Application metadata
+        id: metadata
+        uses: equisoft-actions/application-metadata@v1
+        with:
+          hotfix-branch-prefix: release/
+
+  docker-build-and-push:
+    name: Build and push docker images
+    needs: [setup]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        name:
+          - "crm-base"
+          - "crm-cron-base"
+          - "crm-worker-base"
+    outputs:
+      image-version: ${{ steps.build-and-push.outputs.image-version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Validate Dockerfile
+        uses: equisoft-actions/hadolint@1
+        with:
+          dockerfile: ./${{ matrix.name }}/Dockerfile
+          failure-threshold: error
+          working-directory: .
+
+      - name: Build and push
+        id: build-and-push
+        uses: equisoft-actions/docker-build-and-push@v1
+        with:
+          registry: ${{ secrets.ECR_REGISTRY }}
+          aws-access-key-id: ${{ secrets.ECR_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.ECR_AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.ECR_AWS_REGION }}
+          name: ${{ matrix.name }}
+          working-directory: .
+          dockerfile: ./${{ matrix.name }}/Dockerfile
+          push: ${{ needs.setup.outputs.publishable }}
+          is-release: ${{ needs.setup.outputs.is-release }}
+          version: ${{ needs.setup.outputs.version }}
+
+  docker-security:
+    uses: equisoft-actions/docker-workflows/.github/workflows/security.yml@v2
+    if: needs.setup.outputs.publishable == 'true'
+    needs:
+      - setup
+      - docker-build-and-push
+    strategy:
+      matrix:
+        name:
+          - "crm-base"
+          - "crm-cron-base"
+          - "crm-worker-base"
+    with:
+      image-tag: ${{ matrix.name }}:${{ needs.docker-build-and-push.outputs.image-version }}
+      working-directory: .
+    secrets:
+      REGISTRY: ${{ secrets.ECR_REGISTRY }}
+      ECR_AWS_ACCESS_KEY_ID: ${{ secrets.ECR_AWS_ACCESS_KEY_ID }}
+      ECR_AWS_SECRET_ACCESS_KEY: ${{ secrets.ECR_AWS_SECRET_ACCESS_KEY }}
+      ECR_AWS_REGION: ${{ secrets.ECR_AWS_REGION }}
