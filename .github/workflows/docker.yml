@@ -33,12 +33,6 @@ jobs:
     name: Build and push docker images
     needs: [setup]
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        name:
-          - "crm-base"
-          - "crm-cron-base"
-          - "crm-worker-base"
     outputs:
       image-version: ${{ steps.build-and-push.outputs.image-version }}
     steps:
@@ -46,7 +40,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Validate Dockerfile
-        uses: equisoft-actions/hadolint@1
+        uses: equisoft-actions/hadolint@v1
         with:
           dockerfile: ./${{ matrix.name }}/Dockerfile
           failure-threshold: error
@@ -56,34 +50,12 @@ jobs:
         id: build-and-push
         uses: equisoft-actions/docker-build-and-push@v1
         with:
-          registry: ${{ secrets.ECR_REGISTRY }}
-          aws-access-key-id: ${{ secrets.ECR_AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.ECR_AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.ECR_AWS_REGION }}
-          name: ${{ matrix.name }}
+          registry: ghcr.io
+          username: kronostechnologies-build
+          password: ${{ secrets.GHCR_TOKEN }}
+          name: "clamav"
           working-directory: .
-          dockerfile: ./${{ matrix.name }}/Dockerfile
+          dockerfile: ./Dockerfile
           push: ${{ needs.setup.outputs.publishable }}
           is-release: ${{ needs.setup.outputs.is-release }}
           version: ${{ needs.setup.outputs.version }}
-
-  docker-security:
-    uses: equisoft-actions/docker-workflows/.github/workflows/security.yml@v2
-    if: needs.setup.outputs.publishable == 'true'
-    needs:
-      - setup
-      - docker-build-and-push
-    strategy:
-      matrix:
-        name:
-          - "crm-base"
-          - "crm-cron-base"
-          - "crm-worker-base"
-    with:
-      image-tag: ${{ matrix.name }}:${{ needs.docker-build-and-push.outputs.image-version }}
-      working-directory: .
-    secrets:
-      REGISTRY: ${{ secrets.ECR_REGISTRY }}
-      ECR_AWS_ACCESS_KEY_ID: ${{ secrets.ECR_AWS_ACCESS_KEY_ID }}
-      ECR_AWS_SECRET_ACCESS_KEY: ${{ secrets.ECR_AWS_SECRET_ACCESS_KEY }}
-      ECR_AWS_REGION: ${{ secrets.ECR_AWS_REGION }}
