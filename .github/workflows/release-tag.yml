@@ -1,0 +1,22 @@
+name: Create release tag
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get next version
+        uses: reecetech/version-increment@2024.10.1
+        id: version
+        with:
+          scheme: semver
+          increment: patch
+
+      - name: print next version
+        run: echo "Next version is ${{ steps.version.outputs.version }}"
