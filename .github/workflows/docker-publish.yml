@@ -13,7 +13,7 @@ jobs:
       - id: build_info
         name: build info
         run:
-          echo ::set-output name=tags::ghcr.io/${GITHUB_REPOSITORY//docker-/}:v-${GITHUB_REF#refs/tags/},ghcr.io/${GITHUB_REPOSITORY//docker-/}:latest
+          echo ::set-output name=tags::ghcr.io/${GITHUB_REPOSITORY//docker-/}:v${GITHUB_REF#refs/tags/},ghcr.io/${GITHUB_REPOSITORY//docker-/}:latest
       - name: setup qemu
         uses: docker/setup-qemu-action@v1
       - name: setup buildx
