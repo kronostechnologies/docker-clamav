@@ -27,3 +27,9 @@ jobs:
 
           tags="ghcr.io/${GITHUB_REPOSITORY//docker-/}:prod-$(git describe --tags --abbrev=0)"
           echo "tags=${tags}" >> $GITHUB_OUTPUT
+      - id: echo
+        shell: bash
+        run: |
+          set -eo pipefail
+
+          echo "tags=${{ steps.build_info.outputs.tags }}"
