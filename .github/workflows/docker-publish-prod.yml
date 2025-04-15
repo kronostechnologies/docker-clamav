@@ -45,6 +45,5 @@ jobs:
         run: |
           set -eo pipefail
 
-          docker pull ${{ steps.build_info.outputs.current_image }}
           docker image tag ${{ steps.build_info.outputs.current_image }} ${{ steps.build_info.outputs.tags }}
           docker push ${{ steps.build_info.outputs.tags }}
