@@ -17,9 +17,8 @@ jobs:
         shell: bash
         run: |
           set -eo pipefail
-
-          current_image="ghcr.io/${GITHUB_REPOSITORY//docker-/}:v$(git describe --tags --abbrev=0)"
-          tags="ghcr.io/${GITHUB_REPOSITORY//docker-/}:prod-$(git describe --tags --abbrev=0)"
+          current_image="ghcr.io/${GITHUB_REPOSITORY//docker-/}:v$(git tag --sort=-v:refname | head -n1)"
+          tags="ghcr.io/${GITHUB_REPOSITORY//docker-/}:prod-$(git tag --sort=-v:refname | head -n1)"
           echo "tags=${tags}" >> $GITHUB_OUTPUT
           echo "current_image=${current_image}" >> $GITHUB_OUTPUT
       - name: setup qemu
